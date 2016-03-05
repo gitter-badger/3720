@@ -11,11 +11,14 @@ import org.hibernate.service.ServiceRegistry;
  */
 public class HBNT {
     private static SessionFactory sessionFactory;
+
     /**
-     * 封装hibernate的session工厂
+     * 获取会话对象
+     *
+     * @return 返回会话对象
      */
-    public static Session getSession(){
-        if (sessionFactory!=null){
+    public static Session getSession() {
+        if (sessionFactory != null) {
             return sessionFactory.getCurrentSession();
         }
         Configuration configuration = new Configuration().configure();

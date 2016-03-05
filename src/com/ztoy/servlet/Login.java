@@ -1,5 +1,6 @@
 package com.ztoy.servlet;
 
+import com.ztoy.Cookie.LoginCookie;
 import com.ztoy.DAO.UserDAO;
 import com.ztoy.HBNT.HBNT;
 import com.ztoy.MD5.MD5util;
@@ -18,7 +19,7 @@ import java.security.NoSuchAlgorithmException;
 /**
  * 用户登录验证
  */
-@WebServlet(name = "Login",urlPatterns = "/loginBean")
+@WebServlet(name = "Login", urlPatterns = "/login")
 public class Login extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         User user = new User();
@@ -29,10 +30,13 @@ public class Login extends HttpServlet {
             response.setCharacterEncoding("utf-8");
             PrintWriter out = response.getWriter();
             Transaction transaction = HBNT.getSession().beginTransaction();
-            if (UserDAO.login(user)){
-                out.println("恭喜您"+user.getUserName()+"！登录成功！");
-            }else {
-                out.println("对不起"+user.getUserName()+"！用户名或密码不正确，请重新输入！");
+            if (UserDAO.login(user)) {
+                out.println("恭喜您" + user.getUserName() + "！登录成功！");
+
+                LoginCookie.addCookie(response,"userName",user.getUserName(),604800);
+                LoginCookie.addCookie(response,"password",user.getPassword(),604800);
+            } else {
+                out.println("对不起" + user.getUserName() + "！用户名或密码不正确，请重新输入！");
             }
             transaction.commit();
         } catch (NoSuchAlgorithmException e) {
