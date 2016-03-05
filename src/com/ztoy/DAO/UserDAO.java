@@ -1,7 +1,5 @@
 package com.ztoy.DAO;
 
-import com.ztoy.loginBean.User;
-
 import java.util.List;
 
 /**
@@ -11,13 +9,18 @@ public class UserDAO extends DAO {
     /**
      * 验证用户登录信息
      *
-     * @param user 被验证的对象
+     * @param userName 用户名
+     * @param password 密码
      * @return 数据库中是否存在该对象
      */
-    public static boolean login(User user) {
-        String hql = "from User where userName = ? and password = ?";
-        List list = select(hql, user.getUserName(), user.getPassword());
-        return !list.isEmpty();
+    public static boolean login(String userName, String password) {
+        if (userName != null && password != null) {
+            String hql = "from User where userName = ? and password = ?";
+            List list = select(hql, userName, password);
+            return !list.isEmpty();
+        } else {
+            return false;
+        }
     }
 
     /**

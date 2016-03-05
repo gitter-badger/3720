@@ -1,3 +1,4 @@
+<%@ page import="com.ztoy.Token.LoginToken" %>
 <%--
   Created by IntelliJ IDEA.
   User: zuo
@@ -12,6 +13,7 @@
 </head>
 <body>
 <form action="${pageContext.request.contextPath}/sign" method="post">
+    <input type="hidden" name="token" value="<%=LoginToken.setToken(session)%>">
     <label>
         用户名:
         <input type="text" name="userName"/>

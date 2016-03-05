@@ -4,7 +4,7 @@ import com.ztoy.Cookie.LoginCookie;
 import com.ztoy.DAO.UserDAO;
 import com.ztoy.HBNT.HBNT;
 import com.ztoy.MD5.MD5util;
-import com.ztoy.loginBean.User;
+import com.ztoy.Token.LoginToken;
 import org.hibernate.Transaction;
 
 import javax.servlet.ServletException;
@@ -14,7 +14,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.security.NoSuchAlgorithmException;
 
 /**
  * 用户登录验证
@@ -22,25 +21,28 @@ import java.security.NoSuchAlgorithmException;
 @WebServlet(name = "Login", urlPatterns = "/login")
 public class Login extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        User user = new User();
-        user.setUserName(request.getParameter("userName"));
-        try {
-            user.setPassword(MD5util.encoderByMD5(request.getParameter("password")));
-            response.setHeader("Content-type", "text/html;charset=UTF-8");
-            response.setCharacterEncoding("utf-8");
-            PrintWriter out = response.getWriter();
-            Transaction transaction = HBNT.getSession().beginTransaction();
-            if (UserDAO.login(user)) {
-                out.println("恭喜您" + user.getUserName() + "！登录成功！");
+        if (LoginToken.checkToken(request)) {
+            try {
+                response.setHeader("Content-type", "text/html;charset=UTF-8");//设置浏览器解析响应的格式
+                response.setCharacterEncoding("utf-8");
+                PrintWriter out = response.getWriter();
+                Transaction transaction = HBNT.getSession().beginTransaction();//开启事物
 
-                LoginCookie.addCookie(response,"userName",user.getUserName(),604800);
-                LoginCookie.addCookie(response,"password",user.getPassword(),604800);
-            } else {
-                out.println("对不起" + user.getUserName() + "！用户名或密码不正确，请重新输入！");
+                String userName = request.getParameter("userName");
+                String password = MD5util.encoderByMD5(request.getParameter("password"));
+
+                if (UserDAO.login(userName,password)) {
+                    out.println("恭喜您" + userName + "！登录成功！");
+
+                    LoginCookie.addCookie(response,"userName",userName,604800);
+                    LoginCookie.addCookie(response,"password",password,604800);
+                } else {
+                    out.println("对不起" + userName + "！用户名或密码不正确，请重新输入！");
+                }
+                transaction.commit();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            transaction.commit();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
         }
     }
 
